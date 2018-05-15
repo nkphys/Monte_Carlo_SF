@@ -1,0 +1,10 @@
+Xsite=6
+Ysite=6
+Orbitals=3
+Temperature=40.0
+Fill=0.666666667
+MaxMCsteps=4000
+RandomSeed=7315
+J_NN=0.015
+J_NNN=0.01
+J_HUND=0.0
