@@ -182,10 +182,10 @@ void Hamiltonian::InteractionsCreate(){
         ei=MFParams_.etheta(Coordinates_.indx(i),Coordinates_.indy(i));
         ai=MFParams_.ephi(Coordinates_.indx(i),Coordinates_.indy(i));
         for(int k=0;k<orbs_;k++) {  // For each orb
-            Ham_(i+k*ns_,i+k*ns_) -=  J_Hund*( cos(ei));
-            Ham_(i+k*ns_+orbs_*ns_,i+k*ns_+orbs_*ns_) -=  J_Hund*(-cos(ei));
-            Ham_(i+k*ns_,i+k*ns_+orbs_*ns_) -=  J_Hund* sin(ei)*complex<double>( cos(ai),-sin(ai) ) ; //S-
-            Ham_(i+k*ns_+orbs_*ns_,i+k*ns_) -=  J_Hund* sin(ei)*complex<double>( cos(ai), sin(ai) );  //S+
+            Ham_(i+k*ns_,i+k*ns_) -=  J_Hund*( cos(ei))*0.5;
+            Ham_(i+k*ns_+orbs_*ns_,i+k*ns_+orbs_*ns_) -=  J_Hund*(-cos(ei))*0.5;
+            Ham_(i+k*ns_,i+k*ns_+orbs_*ns_) -=  J_Hund* sin(ei)*complex<double>( cos(ai),-sin(ai) )*0.5 ; //S-
+            Ham_(i+k*ns_+orbs_*ns_,i+k*ns_) -=  J_Hund* sin(ei)*complex<double>( cos(ai), sin(ai) )*0.5;  //S+
         }
     }
 
@@ -408,18 +408,14 @@ void Hamiltonian::Hoppings(){
 
     //EXACT HAMILTONIAN FROM EQ-1,2,3 from PRB81, 014511 (2010) is implemented
     // Butfollowing have to be used to reproduce the bands shown in Fig-1 of same paper.
-   /*
-    t1_ = -0.02*one;  t2_ = -0.06*one;
-    t3_ = -0.03*one;  t4_ = 0.01*one;
-    t5_ = -0.2*one;   t6_ = -0.3*one;
-    t7_ = 0.2*one;  t8_ = 0.1*one;
-    */
+
 
     t1 = -0.02;         t2 = -0.06;
     t3 = -0.03;         t4 = 0.01;
     t5 = -0.2;          t6 = -0.3;
     t7 = 0.2;          t8 = 0.1;
-    //
+
+
 
 
     Tx(0,0)=-t2;

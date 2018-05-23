@@ -44,14 +44,14 @@ int main(int argc, char *argv[]) {
 
     if(check_Non_Int==true){
     //Parameters_.J_HUND=0.0;
-   Hamiltonian_.InteractionsCreate();
+   //Hamiltonian_.InteractionsCreate();
   //  Hamiltonian_.Ham_.print();
   // Hamiltonian_.Check_up_down_symmetry();
    //Hamiltonian_.Check_Hermiticity();
-    //Hamiltonian_.Diagonalize('V');
-    //Observables_.Get_Non_Interacting_dispersion();
+   // Hamiltonian_.Diagonalize('V');
+   // Observables_.Get_Non_Interacting_dispersion();
     //Hamiltonian_.Ham_.print();
-    //Observables_.Calculate_Akw();
+    // Observables_.Calculate_Akw();
 
     }
 

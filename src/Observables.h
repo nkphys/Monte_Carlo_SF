@@ -193,10 +193,12 @@ void Observables::Calculate_Akw(){
     }
     //----------------------------------
 
-    //--------M to \Gamma-----------------
+    //--------M to \Gamma[with one extra point,
+    //                  because in gnuplor use "set pm3d corners2color c1"
+    //                  ]-----------------
     kx_i=(Parameters_.lx/2) - 1;
     ky_i=(Parameters_.lx/2) - 1;
-    for(kx_i=(Parameters_.lx/2) - 1;kx_i>=0;kx_i--){
+    for(kx_i=(Parameters_.lx/2) - 1;kx_i>=-1;kx_i--){
     temp_pair.first = kx_i;
     temp_pair.second = kx_i;
     k_path.push_back(temp_pair);
@@ -204,7 +206,7 @@ void Observables::Calculate_Akw(){
     //----------------------------------
 
 
-
+    double k22_offset=0;
     for(int k_point=0;k_point<k_path.size();k_point++){
 
             kx_i=k_path[k_point].first;
@@ -227,8 +229,8 @@ void Observables::Calculate_Akw(){
                                           ky*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
                                 A_up_11[j][l][omega_ind];
                         temp_up_22 += one_complex*
-                                exp(iota_complex*((kx+PI)*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
-                                          (ky+PI)*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
+                                exp(iota_complex*((kx+k22_offset)*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
+                                          (ky+k22_offset)*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
                                 A_up_22[j][l][omega_ind];
                         temp_dn_00 += one_complex*
                                 exp(iota_complex*(kx*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
@@ -239,8 +241,8 @@ void Observables::Calculate_Akw(){
                                           ky*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
                                 A_dn_11[j][l][omega_ind];
                         temp_dn_22 += one_complex*
-                                exp(iota_complex*((kx+PI)*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
-                                          (ky+PI)*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
+                                exp(iota_complex*((kx+k22_offset)*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
+                                          (ky+k22_offset)*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
                                 A_dn_22[j][l][omega_ind];
 
                     }

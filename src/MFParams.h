@@ -4,6 +4,7 @@
 #include "Coordinates.h"
 #include "random"
 #include <stdlib.h>
+#define PI acos(-1.0)
 
 #ifndef MFParams_class
 #define MFParams_class
@@ -115,8 +116,8 @@ void MFParams::initialize(){
             //ephi(i,j)=(0.5+0.5*pow(-1.0f,i))*Parameters_.pi + grnd()*0.2;
             //etheta(i,j)=0.5*Parameters_.pi + grnd()*0.2;
 
-            ephi(i,j)=random()*0.2;
-            etheta(i,j)=random()*0.3;
+            ephi(i,j)=2.0*random()*PI;
+            etheta(i,j)=random()*PI;
         }
     }
 
