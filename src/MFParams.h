@@ -49,7 +49,8 @@ void MFParams::Adjust_MCWindow(){
     ratio=Parameters_.AccCount[0]/(Parameters_.AccCount[0]+Parameters_.AccCount[1]);
     //cout<<"ratio= "<< ratio << "temp= "<<Parameters_.temp << endl;
     Parameters_.AccCount[0]=0; Parameters_.AccCount[1]=0;
-    Parameters_.WindowSize *= abs(1.0 + 0.2*(ratio-0.5));
+    //Parameters_.WindowSize *= abs(1.0 + 0.2*(ratio-0.5));
+    Parameters_.WindowSize =1.0;
     cout << "Ratio: " << ratio << "  window size:  "<<Parameters_.WindowSize<< endl;
     return;
 } // ----------
@@ -116,8 +117,17 @@ void MFParams::initialize(){
             //ephi(i,j)=(0.5+0.5*pow(-1.0f,i))*Parameters_.pi + grnd()*0.2;
             //etheta(i,j)=0.5*Parameters_.pi + grnd()*0.2;
 
-            ephi(i,j)=2.0*random()*PI;
-            etheta(i,j)=random()*PI;
+            //q=(0,pi)
+            //ephi(i,j)=0.0; //(0.5+0.5*pow(-1.0f,i))*Parameters_.pi + grnd()*0.2;
+            //etheta(i,j)=0.5*(pow(-1.0,j)  + 1.0 )*PI ;//+ grnd()*0.2;
+
+            //q=(0,0)
+            ephi(i,j)=0.0; //(0.5+0.5*pow(-1.0f,i))*Parameters_.pi + grnd()*0.2;
+            etheta(i,j)=0.0 ;//+ grnd()*0.2;
+
+            //RANDOM
+            //ephi(i,j)=2.0*random()*PI;
+            //etheta(i,j)=random()*PI;
         }
     }
 

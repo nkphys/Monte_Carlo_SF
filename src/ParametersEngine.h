@@ -115,6 +115,7 @@ void Parameters::Initialize(string inputfile_){
     AccCount[1]=0;
 
     WindowSize=double(0.01);
+    mus=0.25;
     cout << "____________________________________" << endl;
 }
 

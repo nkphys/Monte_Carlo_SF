@@ -31,6 +31,7 @@ public:
     void SiSjFULL();
 
     void SiSjQ_Average();
+    void Total_Energy_Average(double Curr_QuantE, double CurrE);
 
     void OccDensity(int tlabel);
     void DOSprint(int tlabel);
@@ -53,6 +54,7 @@ public:
     vector<double> nia_,nib_,nic_;
     Matrix<double> SiSj_,dos;
     vector<double> sx_,sy_,sz_;
+    double AVG_Total_Energy, AVG_Total_Energy_sqr;
 };
 /*
  * ***********
@@ -558,6 +560,11 @@ void Observables::SiSjQ_Average(){
 } // ----------
 
 
+void Observables::Total_Energy_Average(double Curr_QuantE, double CurrE){
+
+AVG_Total_Energy += Curr_QuantE + CurrE;
+AVG_Total_Energy_sqr += (Curr_QuantE + CurrE)*(Curr_QuantE + CurrE);
+}
 
 void Observables::OccDensity(int tlabel){
 

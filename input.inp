@@ -12,7 +12,7 @@ Temperature_min=20.0
 Temperature_max=40.0
 dTemperature=20.0
 
-Temperature=40.0
+Temperature=10.0
 
 Metropolis_Algo=1
 MaxMCsweeps=3000

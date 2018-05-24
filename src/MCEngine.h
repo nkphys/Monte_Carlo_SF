@@ -50,6 +50,7 @@ void MCEngine::RUN_MC(){
     int Gap_bw_sweeps = Parameters_.Measurement_after_each_m_sweeps;
 
     double PrevE,CurrE,P_new,P12,muu;
+    double Curr_QuantE;
     int x,y,act;
     double saved_Params[2];
 
@@ -76,6 +77,8 @@ void MCEngine::RUN_MC(){
                 Observables_.SiSjQ_square_Mean_(ix,iy)=zero;
             }
         }
+        Observables_.AVG_Total_Energy=0.0;
+        Observables_.AVG_Total_Energy_sqr=0.0;
 
         MFParams_.etheta_avg.fill(0.0);
         MFParams_.ephi_avg.fill(0.0);
@@ -160,7 +163,8 @@ void MCEngine::RUN_MC(){
                 CurrE = Hamiltonian_.GetCLEnergy();
                 Hamiltonian_.InteractionsCreate();
                 Hamiltonian_.Diagonalize(Parameters_.Dflag);
-                muu=Hamiltonian_.chemicalpotential(0.25,Parameters_.Fill);
+                muu=Hamiltonian_.chemicalpotential(Parameters_.mus,Parameters_.Fill);
+                Curr_QuantE = Hamiltonian_.E_QM();
 
                 //Ratio of Quantum partition functions
                 // i.e <exp(-beta(Hquant_new))>/<exp(-beta(Hquant_old))>
@@ -237,8 +241,8 @@ void MCEngine::RUN_MC(){
                     Observables_.SiSjFULL();
                     file_out_progress << int(1.0*count) <<setw(20)<< Observables_.SiSj(0,1) <<setw(16)<< Observables_.SiSj(1,0)
                                       <<setw(16)<< Observables_.SiSjQ(0,int(lx_/2)).real() <<setw(16)<< Observables_.SiSjQ(int(lx_/2),0).real()
-                                     <<setw(16)<< Hamiltonian_.TotalDensity() <<setw(16)<< PrevE
-                                    <<setw(16)<< Hamiltonian_.E_QM()<<setw(15)<<Parameters_.mus<< endl;
+                                     <<setw(16)<< Hamiltonian_.TotalDensity() <<setw(16)<< CurrE
+                                    <<setw(16)<< Curr_QuantE<<setw(15)<<muu<< endl;
                 }
             }
             //Average and Std. deviation is calculated is done
@@ -247,6 +251,7 @@ void MCEngine::RUN_MC(){
                 if(measure_start==0){
                     measure_start++;
                     file_out_progress<<"----------Measurement is started----------"<<endl;
+                    file_out_progress<<"Avg{S(pi,0)}  Avg{S(0,pi)}  std.dev{S(pi,0)}  std.dev{S(0,pi)}  Avg{E}  std.dev{E}"<<endl;
                 }
                 int temp_count=count -
                         (Parameters_.IterMax - (Gap_bw_sweeps*(MC_sweeps_used_for_Avg - 1) + MC_sweeps_used_for_Avg));
@@ -255,6 +260,7 @@ void MCEngine::RUN_MC(){
                     Confs_used=Confs_used+1;
                     Observables_.SiSjFULL();
                     Observables_.SiSjQ_Average();
+                    Observables_.Total_Energy_Average(Curr_QuantE, CurrE);
 
                     MFParams_.Calculate_Fields_Avg();
 
@@ -264,14 +270,20 @@ void MCEngine::RUN_MC(){
                                       <<setw(16)<<Observables_.SiSjQ_Mean(0,int(lx_/2)).real()/(Confs_used*1.0)
                                      <<setw(16)<<
                                        sqrt(
-                                       (( Observables_.SiSjQ_square_Mean(0,int(lx_/2))/(Confs_used*1.0) ) -
-                                        ((Observables_.SiSjQ_Mean(0,int(lx_/2))*Observables_.SiSjQ_Mean(0,int(lx_/2)) )/(Confs_used*Confs_used*1.0) ) ).real()
+                                       (( Observables_.SiSjQ_square_Mean(int(lx_/2),0)/(Confs_used*1.0) ) -
+                                        ((Observables_.SiSjQ_Mean(int(lx_/2),0)*Observables_.SiSjQ_Mean(int(lx_/2),0) )/(Confs_used*Confs_used*1.0) ) ).real()
                                            )
+
                                     <<setw(16)<<
                                       sqrt(
-                                      (( Observables_.SiSjQ_square_Mean(int(lx_/2),0)/(Confs_used*1.0) ) -
-                                       ((Observables_.SiSjQ_Mean(int(lx_/2),0)*Observables_.SiSjQ_Mean(int(lx_/2),0) )/(Confs_used*Confs_used*1.0) ) ).real()
+                                      (( Observables_.SiSjQ_square_Mean(0,int(lx_/2))/(Confs_used*1.0) ) -
+                                       ((Observables_.SiSjQ_Mean(0,int(lx_/2))*Observables_.SiSjQ_Mean(0,int(lx_/2)) )/(Confs_used*Confs_used*1.0) ) ).real()
                                           )
+                                      <<setw(16)<<
+                                       Observables_.AVG_Total_Energy/(Confs_used*1.0)
+                                        <<setw(16)<<
+                                       sqrt(  (Observables_.AVG_Total_Energy_sqr/(Confs_used*1.0)) -
+                                          ((Observables_.AVG_Total_Energy*Observables_.AVG_Total_Energy)/(Confs_used*Confs_used*1.0))  )
                                    <<endl;
 
                 }
