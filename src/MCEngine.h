@@ -49,8 +49,9 @@ void MCEngine::RUN_MC(){
     int MC_sweeps_used_for_Avg=Parameters_.Last_n_sweeps_for_measurement;
     int Gap_bw_sweeps = Parameters_.Measurement_after_each_m_sweeps;
 
-    double PrevE,CurrE,P_new,P12,muu;
+    double PrevE,CurrE,P_new,P12,muu_prev;
     double Curr_QuantE;
+    double Prev_QuantE;
     int x,y,act;
     double saved_Params[2];
 
@@ -69,7 +70,7 @@ void MCEngine::RUN_MC(){
 
         cout << "Temperature = " << temp_<<" is being done"<<endl;
         Parameters_.temp=temp_;
-        Parameters_.beta=double(11604.0/ temp_);
+        Parameters_.beta=double(11604.0/temp_);
 
         for(int ix=0;ix<lx_;ix++){
             for(int iy=0;iy<ly_;iy++){
@@ -122,19 +123,13 @@ void MCEngine::RUN_MC(){
 
 
 
-        /*
+        PrevE = Hamiltonian_.GetCLEnergy();
         Hamiltonian_.InteractionsCreate();
         Hamiltonian_.Diagonalize(Parameters_.Dflag);
-        PrevE=Hamiltonian_.GetCLEnergy();
-        Hamiltonian_.copy_eigs(1);
-        Parameters_.mus=0.25;
         Parameters_.mus=Hamiltonian_.chemicalpotential(0.25,Parameters_.Fill);
-        //P_old=Prob(PrevE,Parameters_.mus);
-        Observables_.SiSjFULL();
-
-        */
-
-
+        Prev_QuantE = Hamiltonian_.E_QM();
+        muu_prev=Parameters_.mus;
+        Hamiltonian_.copy_eigs(1);
 
 
 
@@ -163,12 +158,13 @@ void MCEngine::RUN_MC(){
                 CurrE = Hamiltonian_.GetCLEnergy();
                 Hamiltonian_.InteractionsCreate();
                 Hamiltonian_.Diagonalize(Parameters_.Dflag);
-                muu=Hamiltonian_.chemicalpotential(Parameters_.mus,Parameters_.Fill);
+                Parameters_.mus=Hamiltonian_.chemicalpotential(muu_prev,Parameters_.Fill);
                 Curr_QuantE = Hamiltonian_.E_QM();
 
                 //Ratio of Quantum partition functions
-                // i.e <exp(-beta(Hquant_new))>/<exp(-beta(Hquant_old))>
-                P_new = Prob(Parameters_.mus, muu);
+                // i.e Tr(exp(-beta(Hquant_new)))/Tr(exp(-beta(Hquant_old)))
+                //P_new = Prob(muu_prev, Parameters_.mus);
+                P_new = exp(-Parameters_.beta*(Curr_QuantE-Prev_QuantE));
 
 
                 //P12 = [ <exp(-beta(Hquant_new))>/<exp(-beta(Hquant_old))> ]*
@@ -204,8 +200,9 @@ void MCEngine::RUN_MC(){
                 if ( MFParams_.random() < P12 ) {
                     Parameters_.AccCount[0]++;
                     PrevE=CurrE;
+                    Prev_QuantE = Curr_QuantE;
                     Hamiltonian_.copy_eigs(1);
-                    Parameters_.mus = muu;
+                    muu_prev=Parameters_.mus;
                     act=1;
                 }
 
@@ -242,7 +239,7 @@ void MCEngine::RUN_MC(){
                     file_out_progress << int(1.0*count) <<setw(20)<< Observables_.SiSj(0,1) <<setw(16)<< Observables_.SiSj(1,0)
                                       <<setw(16)<< Observables_.SiSjQ(0,int(lx_/2)).real() <<setw(16)<< Observables_.SiSjQ(int(lx_/2),0).real()
                                      <<setw(16)<< Hamiltonian_.TotalDensity() <<setw(16)<< CurrE
-                                    <<setw(16)<< Curr_QuantE<<setw(15)<<muu<< endl;
+                                    <<setw(16)<< Curr_QuantE<<setw(15)<<Parameters_.mus<< endl;
                 }
             }
             //Average and Std. deviation is calculated is done
@@ -315,14 +312,16 @@ double MCEngine::Prob(double muu, double mu_new){
     double P=double(1.0), X,Y,X2;
 
     for(int i=0;i<2*orbs_*ns_;i++){
-        X = Parameters_.beta*(mu_new - Hamiltonian_.eigs_[i]);
-        Y = Parameters_.beta*(muu - Hamiltonian_.eigs_saved_[i]);
+        X = Parameters_.beta*( (mu_new) - Hamiltonian_.eigs_[i]);
+        Y = Parameters_.beta*( (muu) - Hamiltonian_.eigs_saved_[i]);
         X2 = exp(-X);
         if ( X < 0.0 ) {
             P=P*((1.0+exp(X))/(1.0+exp(Y)));
         }
         else {
             P=P*((1.0+X2)/(X2+exp(Y-X)));
+           // cout<< Y-X<<endl;
+            //cout<<X2<<endl;
         }
     }
 

@@ -118,7 +118,7 @@ void Hamiltonian::Initialize(){
 double Hamiltonian::TotalDensity(){
     double n1=0.0;
     for(int j=0;j<eigs_.size();j++){
-        n1 +=  1.0f/( exp(Parameters_.beta*(eigs_saved_[j]-Parameters_.mus) ) + 1.0f);
+        n1 +=  1.0f/( exp(Parameters_.beta*(eigs_[j]-Parameters_.mus) ) + 1.0f);
     }
     return n1;
 } // ----------
@@ -127,7 +127,7 @@ double Hamiltonian::TotalDensity(){
 double Hamiltonian::E_QM(){
     double E=0.0;
     for(int j=0;j<eigs_.size();j++){
-        E +=  eigs_saved_[j]/( exp(Parameters_.beta*(eigs_saved_[j]-Parameters_.mus) ) + 1.0f);
+        E +=  (eigs_[j]-Parameters_.mus)/( exp(Parameters_.beta*(eigs_[j]-Parameters_.mus) ) + 1.0f);
     }
     return E;
 } // ----------
