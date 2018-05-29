@@ -60,6 +60,9 @@ void MCEngine::RUN_MC(){
 
     double temp_=Parameters_.temp_max;
 
+    double initial_mu_guess;
+    int n_states_occupied_zeroT;
+
 
 
     double Curr_Cluster_CLE;
@@ -126,7 +129,9 @@ void MCEngine::RUN_MC(){
         PrevE = Hamiltonian_.GetCLEnergy();
         Hamiltonian_.InteractionsCreate();
         Hamiltonian_.Diagonalize(Parameters_.Dflag);
-        Parameters_.mus=Hamiltonian_.chemicalpotential(0.5,Parameters_.Fill);
+        n_states_occupied_zeroT=Parameters_.ns*Parameters_.Fill*Parameters_.orbs*2.0;
+        initial_mu_guess=0.5*(Hamiltonian_.eigs_[n_states_occupied_zeroT-1] + Hamiltonian_.eigs_[n_states_occupied_zeroT]);
+        Parameters_.mus=Hamiltonian_.chemicalpotential(initial_mu_guess,Parameters_.Fill);
         Prev_QuantE = Hamiltonian_.E_QM();
         muu_prev=Parameters_.mus;
         Hamiltonian_.copy_eigs(1);
@@ -166,21 +171,21 @@ void MCEngine::RUN_MC(){
                 //Ratio of Quantum partition functions
                 // i.e Tr(exp(-beta(Hquant_new)))/Tr(exp(-beta(Hquant_old)))
                 //P_new = Prob(muu_prev, Parameters_.mus);
-                P_new = exp(-Parameters_.beta*(Curr_QuantE-Prev_QuantE));
+                //P_new = exp(-Parameters_.beta*(Curr_QuantE-Prev_QuantE));
 
 
                 //P12 = [ <exp(-beta(Hquant_new))>/<exp(-beta(Hquant_old))> ]*
                 //      [exp(-beta*E_classical(New)) / exp(-beta*E_classical(old))]
                 //      * [sin(Theta_i(New)) / sin(Theta_i(Old)) ]
-                P12 = P_new*exp(-Parameters_.beta*(CurrE-PrevE));
-                P12*= (sin(MFParams_.etheta(x,y))/sin(saved_Params[0]));
+                P12 = exp(-Parameters_.beta*((CurrE+Curr_QuantE)-(PrevE+Prev_QuantE)));
+
+                //P12*= (sin(MFParams_.etheta(x,y))/sin(saved_Params[0]));
 
                 //Heat bath algorithm [See page-129 of Prof. Elbio's Book]
                 //Heat bath algorithm works for small changes i.e. when P12~1.0
                 if (Heat_Bath_Algo){
                     P12 =P12/(1.0+P12);
                 }
-
 
 
                 //Metropolis Algotithm
@@ -214,6 +219,8 @@ void MCEngine::RUN_MC(){
                     act=0;
                     MFParams_.etheta(x,y) = saved_Params[0];
                     MFParams_.ephi(x,y)   = saved_Params[1];
+                    CurrE=PrevE;
+                    Curr_QuantE=Prev_QuantE;
 
                 }
 
