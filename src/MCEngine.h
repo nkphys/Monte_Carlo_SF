@@ -126,10 +126,12 @@ void MCEngine::RUN_MC(){
         PrevE = Hamiltonian_.GetCLEnergy();
         Hamiltonian_.InteractionsCreate();
         Hamiltonian_.Diagonalize(Parameters_.Dflag);
-        Parameters_.mus=Hamiltonian_.chemicalpotential(0.25,Parameters_.Fill);
+        Parameters_.mus=Hamiltonian_.chemicalpotential(0.5,Parameters_.Fill);
         Prev_QuantE = Hamiltonian_.E_QM();
         muu_prev=Parameters_.mus;
         Hamiltonian_.copy_eigs(1);
+        cout<<"Initial Total Energy = "<<PrevE+Prev_QuantE<<endl;
+        cout<<"Initial mu="<<muu_prev<<endl;
 
 
 

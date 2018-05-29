@@ -43,27 +43,40 @@ int main(int argc, char *argv[]) {
 
 
     if(check_Non_Int==true){
-    //Parameters_.J_HUND=0.0;
-   //Hamiltonian_.InteractionsCreate();
-  //  Hamiltonian_.Ham_.print();
-  // Hamiltonian_.Check_up_down_symmetry();
-   //Hamiltonian_.Check_Hermiticity();
-   // Hamiltonian_.Diagonalize('V');
-   // Observables_.Get_Non_Interacting_dispersion();
-    //Hamiltonian_.Ham_.print();
-    // Observables_.Calculate_Akw();
+        //Parameters_.J_HUND=0.0;
+        Hamiltonian_.InteractionsCreate();
+        //  Hamiltonian_.Ham_.print();
+        // Hamiltonian_.Check_up_down_symmetry();
+        //Hamiltonian_.Check_Hermiticity();
+        Hamiltonian_.Diagonalize('V');
+        int temp=Parameters_.ns*Parameters_.Fill*Parameters_.orbs*2.0;
+        cout<<"mu for n=4 = "<<0.5*(Hamiltonian_.eigs_[temp-1] + Hamiltonian_.eigs_[temp])<<"   "<<
+             Hamiltonian_.eigs_[temp-1]<<"   "<<Hamiltonian_.eigs_[temp]<<endl;
+        Parameters_.mus=0.5*(Hamiltonian_.eigs_[temp-1] + Hamiltonian_.eigs_[temp]);
+        double Quantum_E=Hamiltonian_.E_QM();
+        double Classical_E=Hamiltonian_.GetCLEnergy();
+        cout<<setprecision(9);
+        cout<<"Total_Energy = "<<Quantum_E+Classical_E<<endl;
+        //double mu = chemicalpotential(0.5, temp);
+        // Observables_.Get_Non_Interacting_dispersion();
+        //Hamiltonian_.Ham_.print();
+        //Observables_.Calculate_Akw();
+        //Observables_.Calculate_Akw_at_w(mu);
+        //Observables_.Calculate_Nw();
 
     }
 
 
-        MCEngine MCEngine_(Parameters_,Coordinates_,MFParams_,Hamiltonian_,Observables_);
+     MCEngine MCEngine_(Parameters_,Coordinates_,MFParams_,Hamiltonian_,Observables_);
 
-        Observables_.Initialize();     // Set All Observables to zero
+     Observables_.Initialize();     // Set All Observables to zero
 
-        MCEngine_.RUN_MC();      // Monte-Carlo Engine
+     MCEngine_.RUN_MC();      // Monte-Carlo Engine
 
 
-   
+
+
+
 
     cout << "--------THE END--------" << endl;
 } // main

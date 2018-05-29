@@ -2,6 +2,7 @@
 #include "Coordinates.h"
 #include "MFParams.h"
 #include "Hamiltonian.h"
+#include "tensor_type.h"
 
 #ifndef OBSERVABLES_H
 #define OBSERVABLES_H
@@ -24,6 +25,7 @@ public:
 
     void OccDensity();
     void Calculate_Akw();
+    void Calculate_Nw();
     void Get_Non_Interacting_dispersion();
     double Lorentzian(double x, double brd);
     void TotalOccDensity();
@@ -158,8 +160,8 @@ void Observables::Calculate_Akw(){
                 }
 
                 if(j==l){
-                Nup_check += (A_up_00[j][l][omega_ind] + A_up_11[j][l][omega_ind] + A_up_22[j][l][omega_ind])*d_omega;
-                Ndn_check += (A_dn_00[j][l][omega_ind] + A_dn_11[j][l][omega_ind] + A_dn_22[j][l][omega_ind])*d_omega;
+                    Nup_check += (A_up_00[j][l][omega_ind] + A_up_11[j][l][omega_ind] + A_up_22[j][l][omega_ind])*d_omega;
+                    Ndn_check += (A_dn_00[j][l][omega_ind] + A_dn_11[j][l][omega_ind] + A_dn_22[j][l][omega_ind])*d_omega;
                 }
             }
         }
@@ -180,18 +182,18 @@ void Observables::Calculate_Akw(){
     //--------\Gamma to X-----------------
     ky_i=0;
     for(kx_i=0;kx_i<=(Parameters_.lx/2);kx_i++){
-    temp_pair.first = kx_i;
-    temp_pair.second = ky_i;
-    k_path.push_back(temp_pair);
+        temp_pair.first = kx_i;
+        temp_pair.second = ky_i;
+        k_path.push_back(temp_pair);
     }
     //----------------------------------
 
     //--------X to M-----------------
     kx_i=(Parameters_.lx/2);
     for(ky_i=1;ky_i<=(Parameters_.lx/2);ky_i++){
-    temp_pair.first = kx_i;
-    temp_pair.second = ky_i;
-    k_path.push_back(temp_pair);
+        temp_pair.first = kx_i;
+        temp_pair.second = ky_i;
+        k_path.push_back(temp_pair);
     }
     //----------------------------------
 
@@ -201,9 +203,9 @@ void Observables::Calculate_Akw(){
     kx_i=(Parameters_.lx/2) - 1;
     ky_i=(Parameters_.lx/2) - 1;
     for(kx_i=(Parameters_.lx/2) - 1;kx_i>=-1;kx_i--){
-    temp_pair.first = kx_i;
-    temp_pair.second = kx_i;
-    k_path.push_back(temp_pair);
+        temp_pair.first = kx_i;
+        temp_pair.second = kx_i;
+        k_path.push_back(temp_pair);
     }
     //----------------------------------
 
@@ -211,60 +213,125 @@ void Observables::Calculate_Akw(){
     double k22_offset=0;
     for(int k_point=0;k_point<k_path.size();k_point++){
 
-            kx_i=k_path[k_point].first;
-            ky_i=k_path[k_point].second;
+        kx_i=k_path[k_point].first;
+        ky_i=k_path[k_point].second;
         kx=(2.0*PI*kx_i)/(1.0*Parameters_.lx);
-            ky=(2.0*PI*ky_i)/(1.0*Parameters_.ly);
+        ky=(2.0*PI*ky_i)/(1.0*Parameters_.ly);
 
-            for(int omega_ind=0;omega_ind<omega_index_max;omega_ind++){
-                temp_up_00=zero_complex;temp_up_11=zero_complex;temp_up_22=zero_complex;
-                temp_dn_00=zero_complex;temp_dn_11=zero_complex;temp_dn_22=zero_complex;
+        for(int omega_ind=0;omega_ind<omega_index_max;omega_ind++){
+            temp_up_00=zero_complex;temp_up_11=zero_complex;temp_up_22=zero_complex;
+            temp_dn_00=zero_complex;temp_dn_11=zero_complex;temp_dn_22=zero_complex;
 
-                for(int j=0;j<ns_;j++){
-                    for(int l=0;l<ns_;l++){
-                        temp_up_00 += one_complex*
-                                exp(iota_complex*(kx*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
-                                          ky*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
-                                A_up_00[j][l][omega_ind];
-                        temp_up_11 += one_complex*
-                                exp(iota_complex*(kx*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
-                                          ky*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
-                                A_up_11[j][l][omega_ind];
-                        temp_up_22 += one_complex*
-                                exp(iota_complex*((kx+k22_offset)*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
-                                          (ky+k22_offset)*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
-                                A_up_22[j][l][omega_ind];
-                        temp_dn_00 += one_complex*
-                                exp(iota_complex*(kx*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
-                                          ky*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
-                                A_dn_00[j][l][omega_ind];
-                        temp_dn_11 += one_complex*
-                                exp(iota_complex*(kx*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
-                                          ky*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
-                                A_dn_11[j][l][omega_ind];
-                        temp_dn_22 += one_complex*
-                                exp(iota_complex*((kx+k22_offset)*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
-                                          (ky+k22_offset)*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
-                                A_dn_22[j][l][omega_ind];
+            for(int j=0;j<ns_;j++){
+                for(int l=0;l<ns_;l++){
+                    temp_up_00 += one_complex*
+                            exp(iota_complex*(kx*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
+                                              ky*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
+                            A_up_00[j][l][omega_ind];
+                    temp_up_11 += one_complex*
+                            exp(iota_complex*(kx*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
+                                              ky*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
+                            A_up_11[j][l][omega_ind];
+                    temp_up_22 += one_complex*
+                            exp(iota_complex*((kx+k22_offset)*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
+                                              (ky+k22_offset)*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
+                            A_up_22[j][l][omega_ind];
+                    temp_dn_00 += one_complex*
+                            exp(iota_complex*(kx*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
+                                              ky*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
+                            A_dn_00[j][l][omega_ind];
+                    temp_dn_11 += one_complex*
+                            exp(iota_complex*(kx*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
+                                              ky*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
+                            A_dn_11[j][l][omega_ind];
+                    temp_dn_22 += one_complex*
+                            exp(iota_complex*((kx+k22_offset)*(Coordinates_.indx(j) - Coordinates_.indx(l)) +
+                                              (ky+k22_offset)*(Coordinates_.indy(j) - Coordinates_.indy(l))))*
+                            A_dn_22[j][l][omega_ind];
 
-                    }
                 }
-//Use 1:6:7----for gnuplot
-    file_Akw_out<< k_point<<"   "<<kx_i<<"   "<<ky_i<<"   "<<(ky_i*Parameters_.lx) + kx_i<<"    "<<
-                   omega_min + (d_omega*omega_ind)<<"   "<<omega_ind<<"    "<<temp_up_00.real()<<"    "<<temp_up_11.real()
-                   <<"    "<<
-                   temp_up_22.real()<<"    "<<temp_dn_00.real()<<"    "<<temp_dn_11.real()<<"    "<<temp_dn_22.real()<<"    "<<temp_up_00.imag()<<"    "<<temp_up_11.imag()
-                  <<"    "<<
-                  temp_up_22.imag()<<"    "<<temp_dn_00.imag()<<"    "<<temp_dn_11.imag()<<"    "<<temp_dn_22.imag()<<"    "<<endl;
-
             }
-        file_Akw_out<<endl;
+            //Use 1:6:7----for gnuplot
+            file_Akw_out<< k_point<<"   "<<kx_i<<"   "<<ky_i<<"   "<<(ky_i*Parameters_.lx) + kx_i<<"    "<<
+                           omega_min + (d_omega*omega_ind)<<"   "<<omega_ind<<"    "<<temp_up_00.real()<<"    "<<temp_up_11.real()
+                        <<"    "<<
+                          temp_up_22.real()<<"    "<<temp_dn_00.real()<<"    "<<temp_dn_11.real()<<"    "<<temp_dn_22.real()<<"    "<<temp_up_00.imag()<<"    "<<temp_up_11.imag()
+                       <<"    "<<
+                         temp_up_22.imag()<<"    "<<temp_dn_00.imag()<<"    "<<temp_dn_11.imag()<<"    "<<temp_dn_22.imag()<<"    "<<endl;
+
         }
+        file_Akw_out<<endl;
+    }
 
 
 
 }
 
+
+void Observables::Calculate_Nw(){
+
+    //---------Read from input file-----------------------//
+    string fileout="Nw.txt";
+    double omega_min, omega_max, d_omega;
+    double eta = 0.002;
+    omega_min=-0.6;omega_max=0.6;d_omega=0.00025;
+    //---------------------------------------------------//
+
+    int omega_index_max = int( (omega_max - omega_min)/(d_omega) );
+
+    ofstream file_Nw_out(fileout.c_str());
+
+    complex<double> temp_val11, temp_val22, temp_val00 ;
+    int c1;
+
+
+    for(int omega_ind=0;omega_ind<omega_index_max;omega_ind++){
+
+      temp_val11=zero_complex;
+      temp_val22=zero_complex;
+      temp_val00=zero_complex;
+      //l + 2*ns_ + ns_*orbs_*spin
+
+        for (int j=0;j<Parameters_.ns;j++){
+            for(int n=0;n<Hamiltonian_.Ham_.n_row();n++){
+
+            c1 = j + ns_*Parameters_.orbs;
+            temp_val00 +=  conj(Hamiltonian_.Ham_(c1,n))*Hamiltonian_.Ham_(c1,n)*
+                    Lorentzian( omega_min + (omega_ind*d_omega) - Hamiltonian_.eigs_[n], eta);
+
+            c1 = j+ ns_+ ns_*Parameters_.orbs;
+            temp_val11 +=  conj(Hamiltonian_.Ham_(c1,n))*Hamiltonian_.Ham_(c1,n)*
+                    Lorentzian( omega_min + (omega_ind*d_omega) - Hamiltonian_.eigs_[n], eta);
+
+            c1 = j + 2*ns_+ ns_*Parameters_.orbs;
+            temp_val22 +=  conj(Hamiltonian_.Ham_(c1,n))*Hamiltonian_.Ham_(c1,n)*
+                    Lorentzian( omega_min + (omega_ind*d_omega) - Hamiltonian_.eigs_[n], eta);
+
+
+
+            c1 = j;
+            temp_val00 +=  conj(Hamiltonian_.Ham_(c1,n))*Hamiltonian_.Ham_(c1,n)*
+                    Lorentzian( omega_min + (omega_ind*d_omega) - Hamiltonian_.eigs_[n], eta);
+
+            c1 = j+ ns_;
+            temp_val11 +=  conj(Hamiltonian_.Ham_(c1,n))*Hamiltonian_.Ham_(c1,n)*
+                    Lorentzian( omega_min + (omega_ind*d_omega) - Hamiltonian_.eigs_[n], eta);
+
+            c1 = j + 2*ns_;
+            temp_val22 +=  conj(Hamiltonian_.Ham_(c1,n))*Hamiltonian_.Ham_(c1,n)*
+                    Lorentzian( omega_min + (omega_ind*d_omega) - Hamiltonian_.eigs_[n], eta);
+
+
+               }
+        }
+
+        file_Nw_out<<omega_min + (omega_ind*d_omega)<<"     "<<temp_val00.real()<<"     "
+                  <<temp_val11.real()<<"     "<<temp_val22.real()<<endl;
+
+    }
+
+
+}
 
 void Observables::Get_Non_Interacting_dispersion(){
 
@@ -277,7 +344,7 @@ void Observables::Get_Non_Interacting_dispersion(){
 
     char option = 'V';
 
-/*
+    /*
     t1_ = 0.02*one;  t2_ = 0.06*one;
     t3_ = 0.03*one;  t4_ = -0.01*one;
     t5_ = 0.2*one;   t6_ = 0.3*one;
@@ -350,8 +417,8 @@ void Observables::Get_Non_Interacting_dispersion(){
         }
 
         file_out<<counter_k<<"    "<<kx_<<"   "<<ky_<<"    "<<E_[0]<<"     "<<E_[1]<<"     "<<E_[2]<<endl;
-    kx_= kx_ + dk_;
-    counter_k++;
+        kx_= kx_ + dk_;
+        counter_k++;
     }
 
 
@@ -390,8 +457,8 @@ void Observables::Get_Non_Interacting_dispersion(){
         }
 
         file_out<<counter_k<<"    "<<kx_<<"   "<<ky_<<"    "<<E_[0]<<"     "<<E_[1]<<"     "<<E_[2]<<endl;
-    ky_= ky_ + dk_;
-    counter_k++;
+        ky_= ky_ + dk_;
+        counter_k++;
     }
 
 
@@ -432,8 +499,8 @@ void Observables::Get_Non_Interacting_dispersion(){
         }
 
         file_out<<counter_k<<"    "<<kx_<<"   "<<ky_<<"    "<<E_[0]<<"     "<<E_[1]<<"     "<<E_[2]<<endl;
-    ky_= ky_ - dk_;
-    counter_k++;
+        ky_= ky_ - dk_;
+        counter_k++;
     }
 
 
@@ -562,8 +629,8 @@ void Observables::SiSjQ_Average(){
 
 void Observables::Total_Energy_Average(double Curr_QuantE, double CurrE){
 
-AVG_Total_Energy += Curr_QuantE + CurrE;
-AVG_Total_Energy_sqr += (Curr_QuantE + CurrE)*(Curr_QuantE + CurrE);
+    AVG_Total_Energy += Curr_QuantE + CurrE;
+    AVG_Total_Energy_sqr += (Curr_QuantE + CurrE)*(Curr_QuantE + CurrE);
 }
 
 void Observables::OccDensity(int tlabel){

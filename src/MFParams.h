@@ -123,11 +123,11 @@ void MFParams::initialize(){
 
             //q=(0,pi)
             //ephi(i,j)=0.0; //(0.5+0.5*pow(-1.0f,i))*Parameters_.pi + grnd()*0.2;
-            //etheta(i,j)=0.5*(pow(-1.0,j)  + 1.0 )*PI ;//+ grnd()*0.2;
+            //etheta(i,j)=0.5*(pow(-1.0,j)  + 1.0 )*PI; //+ grnd()*0.2;
 
             //q=(0,0)
-           // ephi(i,j)=0.0; //(0.5+0.5*pow(-1.0f,i))*Parameters_.pi + grnd()*0.2;
-            //etheta(i,j)=0.0 ;//+ grnd()*0.2;
+            //ephi(i,j)=0.0; //(0.5+0.5*pow(-1.0f,i))*Parameters_.pi + grnd()*0.2;
+            //etheta(i,j)=0.0; //+ grnd()*0.2;
 
             //RANDOM
             ephi(i,j)=2.0*random()*PI;

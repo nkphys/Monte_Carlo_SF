@@ -5,6 +5,7 @@
 #include "ParametersEngine.h"
 #include "Coordinates.h"
 #include "MFParams.h"
+#define PI acos(-1.0)
 
 #ifndef Hamiltonian_class
 #define Hamiltonian_class
@@ -57,7 +58,7 @@ double Hamiltonian::chemicalpotential(double muin,double filling){
     double n1,N;
     double dMubydN;
     double nstate = eigs_.size();
-    dMubydN = 0.01*(eigs_[nstate-1] - eigs_[0])/nstate;
+    dMubydN = 0.05*(eigs_[nstate-1] - eigs_[0])/nstate;
     N=filling*double(eigs_.size());
     //temp=Parameters_.temp;
     mu_out = muin;
@@ -156,15 +157,15 @@ double Hamiltonian::GetCLEnergy(){
     // NN TERMS
     for(int i=0;i<ns_;i++){
         site = Coordinates_.neigh(i,0); //+x
-        EClassical += Parameters_.J_NN * (  sx_[i]*sx_[site]  + sy_[i]*sy_[site] + 1.1*sz_[i]*sz_[site] );
+        EClassical += 1.14*Parameters_.J_NN * (  sx_[i]*sx_[site]  + sy_[i]*sy_[site] + 1.0*sz_[i]*sz_[site] );
         site = Coordinates_.neigh(i,2); //+y
-        EClassical += Parameters_.J_NN * (  sx_[i]*sx_[site]  + sy_[i]*sy_[site] + 1.1*sz_[i]*sz_[site] );
+        EClassical += Parameters_.J_NN * (  sx_[i]*sx_[site]  + sy_[i]*sy_[site] + 1.0*sz_[i]*sz_[site] );
 
         // NNN TERMS
         site = Coordinates_.neigh(i,4); //+x+y
-        EClassical += Parameters_.J_NNN * (  sx_[i]*sx_[site]  + sy_[i]*sy_[site] + 1.1*sz_[i]*sz_[site] );
+        EClassical += Parameters_.J_NNN * (  sx_[i]*sx_[site]  + sy_[i]*sy_[site] + 1.0*sz_[i]*sz_[site] );
         site = Coordinates_.neigh(i,7); //+x-y
-        EClassical += Parameters_.J_NNN * (  sx_[i]*sx_[site]  + sy_[i]*sy_[site] + 1.1*sz_[i]*sz_[site] );
+        EClassical += Parameters_.J_NNN * (  sx_[i]*sx_[site]  + sy_[i]*sy_[site] + 1.0*sz_[i]*sz_[site] );
 
     }
 
@@ -244,7 +245,7 @@ void Hamiltonian::Check_Hermiticity()
         }
     }
 
-   // cout<<"Hermiticity: "<<temp<<endl;
+    // cout<<"Hermiticity: "<<temp<<endl;
 }
 
 
@@ -254,7 +255,7 @@ void Hamiltonian::Check_Hermiticity()
 void Hamiltonian::Diagonalize(char option){
 
     //extern "C" void   zheev_(char *,char *,int *,std::complex<double> *, int *, double *,
-      //                       std::complex<double> *,int *, double *, int *);
+    //                       std::complex<double> *,int *, double *, int *);
 
 
     char jobz=option;
@@ -280,9 +281,9 @@ void Hamiltonian::Diagonalize(char option){
         perror("diag: zheev: failed with info!=0.\n");
     }
 
-   // Ham_.print();
+    // Ham_.print();
 
-  //  for(int i=0;i<eigs_.size();i++){
+    //  for(int i=0;i<eigs_.size();i++){
     //    cout<<eigs_[i]<<endl;
     //}
 
@@ -292,6 +293,9 @@ void Hamiltonian::Diagonalize(char option){
 void Hamiltonian::HTBCreate(){
 
     int space=2*orbs_*ns_;
+    int mx=Parameters_.TBC_mx;
+    int my=Parameters_.TBC_my;
+    complex<double> phasex, phasey;
     int l,m,a,b;
     double l_i, DeltaXY=0.4;
     HTB_.fill(0.0);
@@ -301,9 +305,17 @@ void Hamiltonian::HTBCreate(){
 
         // Phase from As positions
         l_i=pow (-1.00, Coordinates_.indx(l) + Coordinates_.indy(l) );
-       //  l_i=1.0;
+        //  l_i=1.0;
 
         // * +x direction Neighbor
+        if(Coordinates_.indx(l)==(Coordinates_.lx_ -1)){
+            phasex=exp(iota_complex*2.0*(1.0*mx)*PI/(1.0*Parameters_.TBC_cellsX));
+            phasey=one_complex;
+        }
+        else{
+            phasex=one_complex;
+            phasey=one_complex;
+        }
         m = Coordinates_.neigh(l,0);
         for(int spin=0;spin<2;spin++) {
             for(int or1=0;or1<orbs_;or1++) {
@@ -313,13 +325,13 @@ void Hamiltonian::HTBCreate(){
                     assert (a!=b);
                     if(a!=b){
                         if ( (or1==2) ^ (or2==2) ) {
-                            HTB_(a,b)=complex<double>(1.0*l_i*Tx(or1,or2),0.0);
+                            HTB_(a,b)=complex<double>(1.0*l_i*Tx(or1,or2),0.0)*phasex;
                             //if(Tx(or1,or2) != 0.0){
                             //cout<<or1<<"   "<<or2<<"  "<<l<<"  "<<m<<"   "<<HTB_(a,b)<<"   "<<endl;
                             // }
                         }
                         else {
-                            HTB_(a,b)=complex<double>(1.0*Tx(or1,or2), 0.0);
+                            HTB_(a,b)=complex<double>(1.0*Tx(or1,or2), 0.0)*phasex;
                             //                            if(Tx(or1,or2) != 0.0){
                             //                                cout<<"here"<<endl;
                             //                            }
@@ -332,6 +344,14 @@ void Hamiltonian::HTBCreate(){
 
 
         // * +y direction Neighbor
+        if(Coordinates_.indy(l)==(Coordinates_.ly_ -1)){
+            phasex=one_complex;
+            phasey=exp(iota_complex*2.0*(1.0*my)*PI/(1.0*Parameters_.TBC_cellsY));
+        }
+        else{
+            phasex=one_complex;
+            phasey=one_complex;
+        }
         m = Coordinates_.neigh(l,2);
         for(int spin=0;spin<2;spin++) {
             for(int or1=0;or1<orbs_;or1++) {
@@ -341,10 +361,10 @@ void Hamiltonian::HTBCreate(){
                     assert (a!=b);
                     if(a!=b){
                         if ( (or1==2) ^ (or2==2) ) {
-                            HTB_(a,b)=complex<double>(1.0*l_i*Ty(or1,or2),0.0);
+                            HTB_(a,b)=complex<double>(1.0*l_i*Ty(or1,or2),0.0)*phasey;
                         }
                         else {
-                            HTB_(a,b)=complex<double>(1.0*Ty(or1,or2),0.0);
+                            HTB_(a,b)=complex<double>(1.0*Ty(or1,or2),0.0)*phasey;
                             //                        if(Ty(or1,or2) != 0.0){
                             //                            cout<<"here"<<endl;
                             //                        }
@@ -357,6 +377,15 @@ void Hamiltonian::HTBCreate(){
 
 
         // * +x+y direction Neighbor
+        phasex=one_complex;
+        phasey=one_complex;
+        if( Coordinates_.indy(l)==(Coordinates_.ly_ -1)  ){
+            phasey=exp(iota_complex*2.0*(1.0*my)*PI/(1.0*Parameters_.TBC_cellsY));
+        }
+        if(Coordinates_.indx(l)==(Coordinates_.lx_ -1)){
+            phasex=exp(iota_complex*2.0*(1.0*mx)*PI/(1.0*Parameters_.TBC_cellsX));
+        }
+
         m = Coordinates_.neigh(l,4);
         for(int spin=0;spin<2;spin++) {
             for(int or1=0;or1<orbs_;or1++) {
@@ -366,10 +395,10 @@ void Hamiltonian::HTBCreate(){
                     assert (a!=b);
                     if(a!=b){
                         if ( (or1==2) ^ (or2==2) ) {
-                            HTB_(a,b)=complex<double>(1.0*l_i*Tpxpy(or1,or2),0.0);
+                            HTB_(a,b)=complex<double>(1.0*l_i*Tpxpy(or1,or2),0.0)*phasex*phasey;
                         }
                         else {
-                            HTB_(a,b)=complex<double>(1.0*Tpxpy(or1,or2),0.0);
+                            HTB_(a,b)=complex<double>(1.0*Tpxpy(or1,or2),0.0)*phasex*phasey;
                         }
 
                         HTB_(b,a)=conj(HTB_(a,b));
@@ -380,7 +409,16 @@ void Hamiltonian::HTBCreate(){
 
 
         // * +x-y direction Neighbor
+        phasex=one_complex;
+        phasey=one_complex;
+        if( Coordinates_.indy(l)==0  ){
+            phasey=exp(-1.0*iota_complex*2.0*(1.0*my)*PI/(1.0*Parameters_.TBC_cellsY));
+        }
+        if(Coordinates_.indx(l)==(Coordinates_.lx_ -1)){
+            phasex=exp(iota_complex*2.0*(1.0*mx)*PI/(1.0*Parameters_.TBC_cellsX));
+        }
         m = Coordinates_.neigh(l,7);
+
         for(int spin=0;spin<2;spin++) {
             for(int or1=0;or1<orbs_;or1++) {
                 for(int or2=0;or2<orbs_;or2++) {
@@ -389,10 +427,10 @@ void Hamiltonian::HTBCreate(){
                     assert (a!=b);
                     if(a!=b){
                         if ( (or1==2) ^ (or2==2) ) {
-                            HTB_(a,b)=complex<double>(1.0*l_i*Tpxmy(or1,or2),0.0);
+                            HTB_(a,b)=complex<double>(1.0*l_i*Tpxmy(or1,or2),0.0)*phasex*phasey;
                         }
                         else {
-                            HTB_(a,b)=complex<double>(1.0*Tpxmy(or1,or2),0.0);
+                            HTB_(a,b)=complex<double>(1.0*Tpxmy(or1,or2),0.0)*phasex*phasey;
                         }
                         HTB_(b,a)=conj(HTB_(a,b));
                     }

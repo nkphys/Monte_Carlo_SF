@@ -5,8 +5,10 @@ class Parameters{
 
 public:
     int lx, ly, ns, orbs, IterMax, MCNorm, RandomSeed;
+    int TBC_mx, TBC_my;
+    int TBC_cellsX, TBC_cellsY;
     int lx_cluster, ly_cluster;
-    double mus, Fill,pi,g12,g66,J_NN,J_NNN,J_HUND,k_const,lamda_12,lamda_66;
+    double mus, Fill,pi,J_NN,J_NNN,J_HUND,k_const,lamda_12,lamda_66;
 
     bool Cooling_;
 
@@ -41,9 +43,13 @@ void Parameters::Initialize(string inputfile_){
     cout << "____________________________________" << endl;
     lx = int(matchstring(inputfile_,"Xsite"));
     ly = int(matchstring(inputfile_,"Ysite"));
-
+    TBC_mx = int(matchstring(inputfile_,"TwistedBoundaryCond_mx"));
+    TBC_my = int(matchstring(inputfile_,"TwistedBoundaryCond_my"));
+    TBC_cellsX = int(matchstring(inputfile_,"TBC_cellsX"));
+    TBC_cellsY = int(matchstring(inputfile_,"TBC_cellsY"));
     lx_cluster = int(matchstring(inputfile_,"Cluster_lx"));
     ly_cluster = int(matchstring(inputfile_,"Cluster_ly"));
+
 
     ns = lx*ly;
     cout << "TotalNumberOfSites = "<< ns << endl;
