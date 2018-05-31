@@ -135,8 +135,12 @@ void MCEngine::RUN_MC(){
         Prev_QuantE = Hamiltonian_.E_QM();
         muu_prev=Parameters_.mus;
         Hamiltonian_.copy_eigs(1);
+        cout<<"Initial Classical Energy = "<<PrevE<<endl;
         cout<<"Initial Total Energy = "<<PrevE+Prev_QuantE<<endl;
         cout<<"Initial mu="<<muu_prev<<endl;
+        //for(int i=0;i<10;i++){
+          //  cout<<i<<"   "<<Hamiltonian_.eigs_[i]<<endl;
+       // }
 
 
 
@@ -170,16 +174,16 @@ void MCEngine::RUN_MC(){
 
                 //Ratio of Quantum partition functions
                 // i.e Tr(exp(-beta(Hquant_new)))/Tr(exp(-beta(Hquant_old)))
-                //P_new = Prob(muu_prev, Parameters_.mus);
-                //P_new = exp(-Parameters_.beta*(Curr_QuantE-Prev_QuantE));
+                /*P12 = [ <exp(-beta(Hquant_new))>/<exp(-beta(Hquant_old))> ]*
+                      [exp(-beta*E_classical(New)) / exp(-beta*E_classical(old))]
+                     * [sin(Theta_i(New)) / sin(Theta_i(Old)) ]*/
+                P_new = Prob(muu_prev, Parameters_.mus);
+                P12 = P_new*exp(-Parameters_.beta*((CurrE)-(PrevE)));
+                P12*= (sin(MFParams_.etheta(x,y))/sin(saved_Params[0]));
 
 
-                //P12 = [ <exp(-beta(Hquant_new))>/<exp(-beta(Hquant_old))> ]*
-                //      [exp(-beta*E_classical(New)) / exp(-beta*E_classical(old))]
-                //      * [sin(Theta_i(New)) / sin(Theta_i(Old)) ]
-                P12 = exp(-Parameters_.beta*((CurrE+Curr_QuantE)-(PrevE+Prev_QuantE)));
-
-                //P12*= (sin(MFParams_.etheta(x,y))/sin(saved_Params[0]));
+                //---OR---
+                //P12 = exp(-Parameters_.beta*((CurrE+Curr_QuantE)-(PrevE+Prev_QuantE)));
 
                 //Heat bath algorithm [See page-129 of Prof. Elbio's Book]
                 //Heat bath algorithm works for small changes i.e. when P12~1.0
