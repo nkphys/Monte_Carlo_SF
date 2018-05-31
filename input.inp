@@ -9,14 +9,14 @@ Fill=0.666666667
 RandomSeed=1
 J_NN=0.015
 J_NNN=0.01
-J_HUND=0.2
+J_HUND=10.0
 
 Cooling=0
 Temperature_min=20.0
 Temperature_max=40.0
 dTemperature=20.0
 
-Temperature=1.0
+Temperature=10.0
 
 Metropolis_Algo=1
 MaxMCsweeps=500

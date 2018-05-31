@@ -177,13 +177,14 @@ void MCEngine::RUN_MC(){
                 /*P12 = [ <exp(-beta(Hquant_new))>/<exp(-beta(Hquant_old))> ]*
                       [exp(-beta*E_classical(New)) / exp(-beta*E_classical(old))]
                      * [sin(Theta_i(New)) / sin(Theta_i(Old)) ]*/
-                P_new = Prob(muu_prev, Parameters_.mus);
-                P12 = P_new*exp(-Parameters_.beta*((CurrE)-(PrevE)));
-                P12*= (sin(MFParams_.etheta(x,y))/sin(saved_Params[0]));
+               // P_new = Prob(muu_prev, Parameters_.mus);
+               // P12 = P_new*exp(-Parameters_.beta*((CurrE)-(PrevE)));
+               // P12*= (sin(MFParams_.etheta(x,y))/sin(saved_Params[0]));
 
 
                 //---OR---
-                //P12 = exp(-Parameters_.beta*((CurrE+Curr_QuantE)-(PrevE+Prev_QuantE)));
+                P12 = exp(-Parameters_.beta*((CurrE+Curr_QuantE)-(PrevE+Prev_QuantE)));
+                P12*= (sin(MFParams_.etheta(x,y))/sin(saved_Params[0]));
 
                 //Heat bath algorithm [See page-129 of Prof. Elbio's Book]
                 //Heat bath algorithm works for small changes i.e. when P12~1.0
