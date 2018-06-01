@@ -173,30 +173,35 @@ void MCEngine::RUN_MC(){
                 Curr_QuantE = Hamiltonian_.E_QM();
 
                 //Ratio of Quantum partition functions
-                // i.e Tr(exp(-beta(Hquant_new)))/Tr(exp(-beta(Hquant_old)))
-                /*P12 = [ <exp(-beta(Hquant_new))>/<exp(-beta(Hquant_old))> ]*
+                /*P = [ Tr(exp(-beta(Hquant_new)))/Tr(exp(-beta(Hquant_old)))]*
                       [exp(-beta*E_classical(New)) / exp(-beta*E_classical(old))]
                      * [sin(Theta_i(New)) / sin(Theta_i(Old)) ]*/
-               // P_new = Prob(muu_prev, Parameters_.mus);
-               // P12 = P_new*exp(-Parameters_.beta*((CurrE)-(PrevE)));
-               // P12*= (sin(MFParams_.etheta(x,y))/sin(saved_Params[0]));
+                /*exp(P12) = P
+                  P12 = log (P)
+                  */
+                P_new = Prob(muu_prev, Parameters_.mus);
+                P12 = P_new - Parameters_.beta*((CurrE)-(PrevE));
+                //P12 = - Parameters_.beta*((CurrE)-(PrevE));
+                //cout<<P12<<endl;
+                //P12 += log ((sin(MFParams_.etheta(x,y))/sin(saved_Params[0])));
+
 
 
                 //---OR---
-                P12 = exp(-Parameters_.beta*((CurrE+Curr_QuantE)-(PrevE+Prev_QuantE)));
-                P12*= (sin(MFParams_.etheta(x,y))/sin(saved_Params[0]));
+                //P12 = exp(-Parameters_.beta*((CurrE+Curr_QuantE)-(PrevE+Prev_QuantE)));
+                //P12*= (sin(MFParams_.etheta(x,y))/sin(saved_Params[0]));
 
                 //Heat bath algorithm [See page-129 of Prof. Elbio's Book]
                 //Heat bath algorithm works for small changes i.e. when P12~1.0
-                if (Heat_Bath_Algo){
-                    P12 =P12/(1.0+P12);
-                }
+              //  if (Heat_Bath_Algo){
+               //     P12 =P12/(1.0+P12);
+              //  }
 
 
                 //Metropolis Algotithm
-                if (Metropolis_Algo){
-                    P12=min(1.0,P12);
-                }
+               // if (Metropolis_Algo){
+                //    P12=min(1.0,P12);
+               // }
 
 
 
@@ -209,7 +214,15 @@ void MCEngine::RUN_MC(){
 
 
                 //ACCEPTED
-                if ( MFParams_.random() < P12 ) {
+                if(P12 > 0){
+                    Parameters_.AccCount[0]++;
+                    PrevE=CurrE;
+                    Prev_QuantE = Curr_QuantE;
+                    Hamiltonian_.copy_eigs(1);
+                    muu_prev=Parameters_.mus;
+                    act=1;
+                }
+                else if ( exp(P12) > ( 1.0 - MFParams_.random() ) ) {
                     Parameters_.AccCount[0]++;
                     PrevE=CurrE;
                     Prev_QuantE = Curr_QuantE;
@@ -224,9 +237,6 @@ void MCEngine::RUN_MC(){
                     act=0;
                     MFParams_.etheta(x,y) = saved_Params[0];
                     MFParams_.ephi(x,y)   = saved_Params[1];
-                    CurrE=PrevE;
-                    Curr_QuantE=Prev_QuantE;
-
                 }
 
                 // if ((act == 1) && (count<1000)) {
@@ -323,20 +333,45 @@ void MCEngine::RUN_MC(){
 
 double MCEngine::Prob(double muu, double mu_new){
 
-    double P=double(1.0), X,Y,X2;
+    double P=0.0;
+    double X,Y,X2;
 
     for(int i=0;i<2*orbs_*ns_;i++){
         X = Parameters_.beta*( (mu_new) - Hamiltonian_.eigs_[i]);
         Y = Parameters_.beta*( (muu) - Hamiltonian_.eigs_saved_[i]);
-        X2 = exp(-X);
-        if ( X < 0.0 ) {
-            P=P*((1.0+exp(X))/(1.0+exp(Y)));
+        //P += log(1 + exp(X)) - log(1 + exp(Y));
+
+        if(X>5){
+            P +=X;
         }
-        else {
-            P=P*((1.0+X2)/(X2+exp(Y-X)));
-           // cout<< Y-X<<endl;
-            //cout<<X2<<endl;
+        else if(fabs(X)<0.001){
+            P += log(2.0 + X);
         }
+        else if(X<-5){
+            P +=exp(X);
+        }
+        else{
+            P +=log(1.0 + exp(X));
+        }
+
+
+
+        if(Y>5){
+            P -=Y;
+        }
+        else if(fabs(Y)<0.001){
+            P -= log(2.0 + Y);
+        }
+        else if(Y<-5){
+            P -=exp(Y);
+        }
+        else{
+            P -=log(1.0 + exp(Y));
+        }
+
+
+
+
     }
 
     return P;

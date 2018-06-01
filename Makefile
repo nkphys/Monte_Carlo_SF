@@ -4,7 +4,7 @@
 
 EXENAME  = sf
 ### ------ Personal PC compilation ------------
-CXX     = g++ #icc
+CXX     = g++
 CPPFLAGS = -std=c++11
 LDFLAGS  = -llapack -lblas
 
@@ -16,7 +16,7 @@ LDFLAGS  = -llapack -lblas
 
 # LDFLAGS  = -L$(MKLROOT)/lib/intel64 -lmkl_intel_lp64 -lmkl_sequential -lmkl_core  -L$(INTELROOT)/lib/intel64 -lpthread
 # LDFLAGS  = -L$(MKLROOT)/lib/intel64  -lmkl_intel_thread -lmkl_core -lmkl_intel_lp64  -lm  -liomp5  -qopenmp -lpthread
-# LDFLAGS  =  /opt/intel/mkl/lib/libmkl_core.a  /opt/intel/mkl/lib/libmkl_intel_lp64.a  /opt/intel/mkl/lib/libmkl_intel_thread.a -ldl -lpthread -lm -I/opt/intel/mkl/include -qopenmp -liomp5
+#LDFLAGS  =  /opt/intel/mkl/lib/libmkl_core.a  /opt/intel/mkl/lib/libmkl_intel_lp64.a  /opt/intel/mkl/lib/libmkl_intel_thread.a -ldl -lpthread -lm -I/opt/intel/mkl/include -qopenmp -liomp5
 ### --- turn on for production -----------
 #CPPFLAGS += -Isrc  #### Look inside the src folder for header files
 #CPPFLAGS += -Wall -Werror -Wextra #### Enable warnings and treat warnings as errors

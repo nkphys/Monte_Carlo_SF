@@ -65,6 +65,7 @@ double Hamiltonian::chemicalpotential(double muin,double filling){
     bool converged=false;
 
 
+    if(1==2){
     for(int i=0;i<50000;i++){
         n1=0.0;
         for(int j=0;j<nstate;j++){
@@ -88,6 +89,48 @@ double Hamiltonian::chemicalpotential(double muin,double filling){
     }
     else{
         //cout<<"mu converged, N = "<<n1<<endl;
+    }
+
+    }
+
+
+    double mu1, mu2;
+    double mu_temp = muin;
+    if(1==1){
+        mu1=eigs_[0];
+        mu2=eigs_[nstate-1];
+    for(int i=0;i<50000;i++){
+        n1=0.0;
+        for(int j=0;j<nstate;j++){
+            n1+=double(1.0/( exp( (eigs_[j]-mu_temp)*Parameters_.beta ) + 1.0));
+        }
+        //cout <<"i  "<< i << "  n1  " << n1 << "  mu  " << mu_out<< endl;
+        if(abs(N-n1)<double(0.0001)){
+            //cout<<abs(N-n1)<<endl;
+            converged=true;
+            break;
+        }
+        else {
+           if(n1 >N){
+               mu2=mu_temp;
+               mu_temp=0.5*(mu1 + mu_temp);
+           }
+           else{
+               mu1=mu_temp;
+               mu_temp=0.5*(mu2 + mu_temp);
+           }
+
+        }
+    }
+
+    if(!converged){
+        //cout<<"mu_not_converged, N = "<<n1<<endl;
+    }
+    else{
+        //cout<<"mu converged, N = "<<n1<<endl;
+    }
+
+    mu_out = mu_temp;
     }
 
     return mu_out;
