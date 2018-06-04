@@ -137,6 +137,7 @@ void MCEngine::RUN_MC(){
         muu_prev=Parameters_.mus;
         Hamiltonian_.copy_eigs(1);
         cout<<"Initial Classical Energy = "<<PrevE<<endl;
+        cout<<"Initial Quantum Energy = "<<Prev_QuantE<<endl;
         cout<<"Initial Total Energy = "<<PrevE+Prev_QuantE<<endl;
         cout<<"Initial mu="<<muu_prev<<endl;
         //for(int i=0;i<10;i++){
@@ -172,7 +173,10 @@ void MCEngine::RUN_MC(){
                 CurrE = Hamiltonian_.GetCLEnergy();
                 Hamiltonian_.InteractionsCreate();
                 Hamiltonian_.Diagonalize(Parameters_.Dflag);
-                Parameters_.mus=Hamiltonian_.chemicalpotential(muu_prev,Parameters_.Fill);
+
+
+                Parameters_.mus=Hamiltonian_.chemicalpotential(muu_prev,Parameters_.mus);
+                //
                 Curr_QuantE = Hamiltonian_.E_QM();
 
                 //Ratio of Quantum partition functions
@@ -183,7 +187,8 @@ void MCEngine::RUN_MC(){
                   P12 = log (P)
                   */
 
-                P_new = Prob(muu_prev, Parameters_.mus);
+                 //same mu-refrence is used, otherwise engine does not work properly
+                P_new = Prob(muu_prev, muu_prev);
                 P12 = P_new - Parameters_.beta*((CurrE)-(PrevE));
                 //P12 = - Parameters_.beta*((CurrE)-(PrevE));
                 //cout<<P12<<endl;
@@ -257,12 +262,12 @@ void MCEngine::RUN_MC(){
             //       Parameters_.mus = Parameters_.mus*0.99f + muu*0.01f;
             //      }
 
-            if ( (count%2==0) ) {
+            if ( (count%10==0) ) {
                 MFParams_.Adjust_MCWindow();
             }
 
             if(count < (Parameters_.IterMax - (Gap_bw_sweeps*(MC_sweeps_used_for_Avg - 1) + MC_sweeps_used_for_Avg)) ){
-                if ( (count%2==0) ) {
+                if ( (count%10==0) ) {
                     Observables_.SiSjFULL();
                     file_out_progress << int(1.0*count) <<setw(20)<< Observables_.SiSj(0,1) <<setw(16)<< Observables_.SiSj(1,0)
                                       <<setw(16)<< Observables_.SiSjQ(0,int(lx_/2)).real() <<setw(16)<< Observables_.SiSjQ(int(lx_/2),0).real()
