@@ -1,5 +1,5 @@
-Xsite=8
-Ysite=8
+Xsite=6
+Ysite=6
 TwistedBoundaryCond_mx=0
 TwistedBoundaryCond_my=0
 TBC_cellsX=32
@@ -16,7 +16,7 @@ Temperature_min=20.0
 Temperature_max=40.0
 dTemperature=20.0
 
-Temperature=10.0
+Temperature=100.0
 
 Metropolis_Algo=1
 MaxMCsweeps=2000

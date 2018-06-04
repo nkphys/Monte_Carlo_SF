@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 
     }
 
-
+    cout<<setprecision(9);
      MCEngine MCEngine_(Parameters_,Coordinates_,MFParams_,Hamiltonian_,Observables_);
 
      Observables_.Initialize();     // Set All Observables to zero

@@ -96,10 +96,11 @@ double Hamiltonian::chemicalpotential(double muin,double filling){
 
     double mu1, mu2;
     double mu_temp = muin;
+    cout<<"mu_input = "<<mu_temp<<endl;
     if(1==1){
         mu1=eigs_[0];
         mu2=eigs_[nstate-1];
-    for(int i=0;i<50000;i++){
+    for(int i=0;i<40;i++){
         n1=0.0;
         for(int j=0;j<nstate;j++){
             n1+=double(1.0/( exp( (eigs_[j]-mu_temp)*Parameters_.beta ) + 1.0));
@@ -121,6 +122,7 @@ double Hamiltonian::chemicalpotential(double muin,double filling){
            }
 
         }
+        cout<<"mu_temp = "<<mu_temp<<"   "<<n1<<endl;
     }
 
     if(!converged){
